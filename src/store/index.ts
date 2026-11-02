@@ -1,5 +1,12 @@
 import { create } from 'zustand';
 
+export interface Target {
+  id: number;
+  name: string;
+  account: string;
+  type: string;
+}
+
 interface State {
   accountId: number;
   money: number;
@@ -9,15 +16,11 @@ interface State {
     balance: number;
   };
 
-  target: {
-    id: number;
-    name: string;
-    account: string;
-    type: string;
-  };
+  target: Target;
 
   saveAccountId: (id: number) => void;
   setSource: (account: string, balance: number) => void;
+  setTarget: (target: Partial<Target>) => void;
 
   append: (number: number) => void;
   pop: () => void;
@@ -48,11 +51,18 @@ const useStore = create<State>()((set) => ({
 
   saveAccountId: (id) => set({ accountId: id }),
   setSource: (account, balance) => set({ source: { account, balance } }),
+  setTarget: (target) =>
+    set((state) => ({
+      target: {
+        ...state.target,
+        ...target,
+      },
+    })),
 
   append: (number) =>
     set((state) => ({
       money: Math.min(
-        state.source.balance,
+        state.source.balance > 0 ? state.source.balance : 1_000_000_000,
         1_000_000_000_000,
         Number(String(state.money) + number)
       ),
